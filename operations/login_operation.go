@@ -67,16 +67,18 @@ type LoginOperation struct {
 	ghToken    string
 	vaultToken string
 	vaultUrl   string
+	keytype    string
 	ext        LoginOperationExternals
 }
 
-func NewLoginOperation(endpoint string, backend string, ghToken string, vaultToken string, vaultUrl string, ext LoginOperationExternals) *LoginOperation {
+func NewLoginOperation(endpoint string, backend string, ghToken string, vaultToken string, vaultUrl string, keytype string, ext LoginOperationExternals) *LoginOperation {
 	return &LoginOperation{
 		endpoint:   endpoint,
 		backend:    backend,
 		ghToken:    ghToken,
 		vaultToken: vaultToken,
 		vaultUrl:   vaultUrl,
+		keytype:    keytype,
 		ext:        ext,
 	}
 }
@@ -134,7 +136,7 @@ func setUpKeys(oper LoginOperation, user *api.User) *runResult {
 	if !keyExists {
 		fmt.Println("Generating your SSH key pair...")
 		err := oper.ext.RunCommand("ssh-keygen",
-			"-t", "ecdsa",
+			"-t", "ecdsa-sk",
 			"-b", "521",
 			"-f", oper.ext.GetPrivateKeyPath(),
 			"-C", "")

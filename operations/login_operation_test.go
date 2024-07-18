@@ -1,6 +1,7 @@
 package operations
 
 import (
+	"fmt"
 	"io"
 	"testing"
 
@@ -79,7 +80,7 @@ func (m mockLoginOperationExternals) GetPrivateKeyPath() string {
 }
 
 func TestUnknownBackend(t *testing.T) {
-	op := NewLoginOperation("https://endpoint", "mybckend", "gh_token", "vault_token", "https://vault_url", &mockLoginOperationExternals{})
+	op := NewLoginOperation("https://endpoint", "mybckend", "gh_token", "vault_token", "https://vault_url", "", &mockLoginOperationExternals{})
 	result := op.run()
 
 	if result.is_error != true {
@@ -100,7 +101,7 @@ func TestGithubBackend(t *testing.T) {
 		readFileBytes:        []byte("stuff"),
 	}
 
-	op := NewLoginOperation("https://endpoint", "github", "", "", "", ext)
+	op := NewLoginOperation("https://endpoint", "github", "", "", "", "", ext)
 	result := op.run()
 
 	if result.is_error != false {
@@ -118,7 +119,7 @@ func ExampleLoginOperation_run_with_github_already_has_ssh() {
 		fileExistsBool:       true,
 	}
 
-	op := NewLoginOperation("https://endpoint", "github", "", "", "", ext)
+	op := NewLoginOperation("https://endpoint", "github", "", "", "", "", ext)
 	op.run()
 
 	// Output:
@@ -137,7 +138,7 @@ func ExampleLoginOperation_run_with_github_token_already_has_ssh() {
 		fileExistsBool:       true,
 	}
 
-	op := NewLoginOperation("https://endpoint", "github", "gh_token", "", "", ext)
+	op := NewLoginOperation("https://endpoint", "github", "gh_token", "", "", "", ext)
 	op.run()
 
 	// Output:
@@ -154,7 +155,7 @@ func ExampleLoginOperation_run_with_github() {
 		readFileBytes:        []byte("stuff"),
 	}
 
-	op := NewLoginOperation("https://endpoint", "github", "", "", "", ext)
+	op := NewLoginOperation("https://endpoint", "github", "", "", "", "", ext)
 	op.run()
 
 	// Output:
@@ -173,7 +174,7 @@ func ExampleLoginOperation_run_with_github_token() {
 		readFileBytes:        []byte("stuff"),
 	}
 
-	op := NewLoginOperation("https://endpoint", "github", "gh_token", "", "", ext)
+	op := NewLoginOperation("https://endpoint", "github", "gh_token", "", "", "", ext)
 	op.run()
 
 	// Output:
@@ -191,7 +192,7 @@ func TestVaultBackend(t *testing.T) {
 		readFileBytes:       []byte("stuff"),
 	}
 
-	op := NewLoginOperation("https://endpoint", "vault", "", "", "", ext)
+	op := NewLoginOperation("https://endpoint", "vault", "", "", "", "", ext)
 	result := op.run()
 
 	if result.is_error != false {
@@ -209,7 +210,7 @@ func ExampleLoginOperation_run_with_vault_already_has_ssh() {
 		fileExistsBool:      true,
 	}
 
-	op := NewLoginOperation("https://endpoint", "vault", "", "", "", ext)
+	op := NewLoginOperation("https://endpoint", "vault", "", "", "", "", ext)
 	op.run()
 
 	// Output:
@@ -229,7 +230,7 @@ func ExampleLoginOperation_run_with_vault_token_already_has_ssh() {
 		fileExistsBool:      true,
 	}
 
-	op := NewLoginOperation("https://endpoint", "vault", "", "gh_token", "", ext)
+	op := NewLoginOperation("https://endpoint", "vault", "", "gh_token", "", "", ext)
 	op.run()
 
 	// Output:
@@ -247,7 +248,7 @@ func ExampleLoginOperation_run_with_vault() {
 		readFileBytes:       []byte("stuff"),
 	}
 
-	op := NewLoginOperation("https://endpoint", "vault", "", "", "", ext)
+	op := NewLoginOperation("https://endpoint", "vault", "", "", "", "", ext)
 	op.run()
 
 	// Output:
@@ -267,7 +268,7 @@ func ExampleLoginOperation_run_with_vault_token() {
 		readFileBytes:       []byte("stuff"),
 	}
 
-	op := NewLoginOperation("https://endpoint", "vault", "", "gh_token", "", ext)
+	op := NewLoginOperation("https://endpoint", "vault", "", "gh_token", "", "", ext)
 	op.run()
 
 	// Output:
@@ -287,7 +288,7 @@ func ExampleLoginOperation_run_with_vault_already_has_ssh_given_url() {
 		fileExistsBool:      true,
 	}
 
-	op := NewLoginOperation("https://endpoint", "vault", "", "", "https://vaultserv", ext)
+	op := NewLoginOperation("https://endpoint", "vault", "", "", "https://vaultserv", "", ext)
 	op.run()
 
 	// Output:
@@ -306,7 +307,7 @@ func ExampleLoginOperation_run_with_vault_token_already_has_ssh_given_url() {
 		fileExistsBool:      true,
 	}
 
-	op := NewLoginOperation("https://endpoint", "vault", "", "gh_token", "https://vaultserv", ext)
+	op := NewLoginOperation("https://endpoint", "vault", "", "gh_token", "https://vaultserv", "", ext)
 	op.run()
 
 	// Output:
@@ -323,7 +324,7 @@ func ExampleLoginOperation_run_with_vault_given_url() {
 		readFileBytes:       []byte("stuff"),
 	}
 
-	op := NewLoginOperation("https://endpoint", "vault", "", "", "https://vaultserv", ext)
+	op := NewLoginOperation("https://endpoint", "vault", "", "", "https://vaultserv", "", ext)
 	op.run()
 
 	// Output:
@@ -342,7 +343,7 @@ func ExampleLoginOperation_run_with_vault_token_given_url() {
 		readFileBytes:       []byte("stuff"),
 	}
 
-	op := NewLoginOperation("https://endpoint", "vault", "", "gh_token", "https://vaultserv", ext)
+	op := NewLoginOperation("https://endpoint", "vault", "", "gh_token", "https://vaultserv", "", ext)
 	op.run()
 
 	// Output:
@@ -366,7 +367,7 @@ func ExampleLoginOperation_run_with_vault_token_given_url_but_fails() {
 		readFileBytes:       []byte("stuff"),
 	}
 
-	op := NewLoginOperation("https://endpoint", "vault", "", "gh_token", "https://vaultserv", ext)
+	op := NewLoginOperation("https://endpoint", "vault", "", "gh_token", "https://vaultserv", "", ext)
 	op.run()
 
 	// Output:
@@ -375,9 +376,93 @@ func ExampleLoginOperation_run_with_vault_token_given_url_but_fails() {
 
 func ExampleLoginOperation_run_output() {
 
-	op := NewLoginOperation("https://endpoint", "somethingrando", "gh_token", "vault_token", "https://vault_url", &mockLoginOperationExternals{})
+	op := NewLoginOperation("https://endpoint", "somethingrando", "gh_token", "vault_token", "https://vault_url", "", &mockLoginOperationExternals{})
 	op.run()
 
 	// Output:
 	//
 }
+
+
+
+
+type mockLoginOperationExternalsForSetup struct {
+	readString string
+	readError  error
+
+	loginWithGithubUser  *api.User
+	loginWithGithubError error
+
+	loginWithVaultUser  *api.User
+	loginWithVaultError error
+
+	readFileBytes []byte
+	readFileError error
+
+	patchBytes []byte
+	patchError error
+
+	fileExistsBool bool
+}
+
+func (m mockLoginOperationExternalsForSetup) Read(secret bool) (string, error) {
+	return m.readString, m.readError
+}
+
+func (m mockLoginOperationExternalsForSetup) RunCommand(name string, arg ...string) error {
+	fmt.Println("RunName: ", name)
+	fmt.Println("RunArg: ", arg)
+	return nil
+}
+
+func (m mockLoginOperationExternalsForSetup) FileExists(path string) bool {
+	return m.fileExistsBool
+}
+
+func (m mockLoginOperationExternalsForSetup) ReadFile(path string) ([]byte, error) {
+	return m.readFileBytes, m.readFileError
+}
+
+func (m mockLoginOperationExternalsForSetup) LoginWithGithub(endpoint string, token string) (*api.User, error) {
+	return m.loginWithGithubUser, m.loginWithGithubError
+}
+
+func (m mockLoginOperationExternalsForSetup) LoginWithVault(vault_url string, token string) (*api.User, error) {
+	return m.loginWithVaultUser, m.loginWithVaultError
+}
+
+func (m mockLoginOperationExternalsForSetup) ReloadDefaultClient() (LoginOperationClient, error) {
+	return m, nil
+}
+
+func (m mockLoginOperationExternalsForSetup) Patch(path string, body io.Reader) ([]byte, error) {
+	
+	return m.patchBytes, m.patchError
+}
+
+func (m mockLoginOperationExternalsForSetup) WriteLogin(auth string, token string, endpoint string, vaultUrl string, vaultToken string) error {
+	return nil
+}
+
+func (m mockLoginOperationExternalsForSetup) GetPublicKeyPath() string {
+	return ""
+}
+
+func (m mockLoginOperationExternalsForSetup) GetPrivateKeyPath() string {
+	return ""
+}
+
+func ExampleLoginOperation_setUpKeys_() {
+
+	var user api.User
+	op := NewLoginOperation("https://endpoint", "somethingrando", "gh_token", "vault_token", "https://vault_url", "", &mockLoginOperationExternalsForSetup{})
+
+	setUpKeys(*op, &user)
+
+	// Output:
+	// Generating your SSH key pair...
+	// RunName:  ssh-keygen
+	// RunArg:  [-t ecdsa -b 521 -f  -C ]
+	// Registering your public key...
+}
+

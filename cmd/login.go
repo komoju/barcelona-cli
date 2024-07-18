@@ -30,6 +30,10 @@ var LoginCommand = cli.Command{
 			Name:  "vault-url",
 			Usage: "Vault URL",
 		},
+		cli.StringFlag{
+			Name:  "keytype",
+			Usage: "Override key type. Default: ecdsa",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		endpoint := c.Args().Get(0)
@@ -37,6 +41,7 @@ var LoginCommand = cli.Command{
 		gh_token := c.String("github-token")
 		vault_token := c.String("vault-token")
 		vault_url := c.String("vault-url")
+		keytype := c.String("keytype")
 
 		ext := struct {
 			utils.UserInputReader
@@ -52,7 +57,7 @@ var LoginCommand = cli.Command{
 			&utils.FileOps{},
 		}
 
-		operation := operations.NewLoginOperation(endpoint, backend, gh_token, vault_token, vault_url, ext)
+		operation := operations.NewLoginOperation(endpoint, backend, gh_token, vault_token, vault_url, keytype, ext)
 		return operations.Execute(operation)
 	},
 	Subcommands: []cli.Command{

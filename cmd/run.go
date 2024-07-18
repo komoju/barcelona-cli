@@ -116,6 +116,7 @@ var RunCommand = cli.Command{
 		if user != "" {
 			params["user"] = user
 		}
+		
 		err := connectToHeritage(params, heritageName, detach)
 
 		if err != nil {
